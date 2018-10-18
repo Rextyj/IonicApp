@@ -1,7 +1,8 @@
 import { WebServicesProvider } from './../../providers/web-services/web-services';
 import { AboutPage } from './../about/about';
 import { Component } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
+import { NavController, NavParams, LoadingController, Refresher } from 'ionic-angular';
+import { InAppBrowser } from '@ionic-native/in-app-browser';
 
 @Component({
   selector: 'page-home',
@@ -14,7 +15,7 @@ export class HomePage {
   textToDisplay: string;
   params;
   news;
-  constructor(public navCtrl: NavController, private navParams: NavParams, private http: WebServicesProvider) {
+  constructor(public navCtrl: NavController, private navParams: NavParams, private http: WebServicesProvider, private iab: InAppBrowser, private loadingCtrl: LoadingController) {
     this.isSignIn = true;
     this.textToDisplay = 'Sign Up';
     this.params = this.navParams.data;
@@ -22,7 +23,12 @@ export class HomePage {
   }
   
   ionViewDidLoad(){
+    const loader = this.loadingCtrl.create({
+      content: 'Loading news, please wait'
+    })
+    loader.present();
     this.http.getNews('home').subscribe(data => {
+      loader.dismiss();
       this.news = data;
       console.log(this.news);
     });
@@ -43,8 +49,17 @@ export class HomePage {
     }
   }
 
-  newsClicked(){
+  newsClicked(newsItem){
     console.log('user clicked the news card');
+    const browser = this.iab.create(newsItem.url);
   }
 
+  doRefresh(refresher) {
+    console.log('begin async op', refresher);
+    this.http.getNews('home').subscribe(data => {
+      refresher.complete();
+      this.news = data;
+      console.log(this.news);
+    });
+  }
 }

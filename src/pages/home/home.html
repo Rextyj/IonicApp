@@ -5,9 +5,13 @@
 </ion-header>
 
 <ion-content padding>
+  <ion-refresher (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
   <h1 text-center>Hello {{params.username}}</h1>
   <div *ngFor='let newsItem of news'>
-    <ion-card (tap)="newsClicked()">
+    <ion-card (tap)="newsClicked(newsItem)">
       <img *ngIf='newsItem.multimedia.length != 0' [src]="newsItem.multimedia[1].url" alt="News Image">
       <ion-card-header>
         {{newsItem.title}}
